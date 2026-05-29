@@ -222,7 +222,7 @@ vim.cmd([[
 ]])
 
 -- Function to change statusline based on window focus
-local function setup_dynamic_statusline()
+--[[local function setup_dynamic_statusline()
 	vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
 		callback = function()
 			vim.opt_local.statusline = table.concat({
@@ -250,7 +250,7 @@ local function setup_dynamic_statusline()
 	})
 end
 
-setup_dynamic_statusline()
+setup_dynamic_statusline()]]
 
 -- ============================================================================
 -- KEYMAPS
@@ -281,10 +281,16 @@ vim.keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" }
 vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
 
 vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save file contents" })
-vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", { desc = "Save file contents while in insert mode" })
+vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", { desc = "Save file contents while in INSERT mode" })
 
-vim.keymap.set("n", "<C-z>", "u", { desc = "Save file contents" })
-vim.keymap.set("i", "<C-z>", "<ESC>ui", { desc = "Save file contents while in insert mode" })
+vim.keymap.set("n", "<C-z>", "u", { desc = "Undo last change" })
+vim.keymap.set("i", "<C-z>", "<ESC>ui", { desc = "Undo last change for INSERT mode" })
+
+vim.keymap.set("n", "<C-b>", "dw", { desc = "Delete preceeding word" })
+vim.keymap.set("i", "<C-b>", "<ESC>ldwi", { desc = "Delete preceeding word in INSERT mode" })
+
+vim.keymap.set("n", "<C-y>", "<C-r>", { desc = "Redo last change" })
+vim.keymap.set("i", "<C-y>", "<ESC><C-r>i", { desc = "Redo last change for INSERT mode" })
 
 vim.keymap.set("i", "<C-Down>", "<ESC>o", { desc = "Command 'o' while in insert mode" })
 vim.keymap.set("i", "<C-Up>", "<ESC>O", { desc = "Command 'O' while in insert mode" })
@@ -450,12 +456,13 @@ vim.pack.add({
 	"https://github.com/nvim-lua/plenary.nvim",
 	"https://github.com/nvim-telescope/telescope.nvim",
 	"https://github.com/akinsho/bufferline.nvim",
+	"https://github.com/nvim-lualine/lualine.nvim",
 })
 
 -- ============================================================================
 -- PLUGIN CONFIGS
 -- ============================================================================
-
+package.path = package.path .. ";/home/bobrcurva/.config/nvim/?.lua"
 local setup_treesitter = function()
 	local treesitter = require("nvim-treesitter")
 	treesitter.setup({})
@@ -703,6 +710,9 @@ end, { desc = "Toggle inline blame" })
 vim.keymap.set("n", "<leader>hd", function()
 	require("gitsigns").diffthis()
 end, { desc = "Diff this" })
+
+local cosmicink = require("cosmicink");
+require("lualine").setup(cosmicink.config)
 
 -- ============================================================================
 -- LSP, Linting, Formatting & Completion
@@ -1013,3 +1023,9 @@ vim.keymap.set("t", "<Esc>", function()
 		terminal_state.is_open = false
 	end
 end, { noremap = true, silent = true, desc = "Close floating terminal" })
+
+-- ============================================================================
+-- INIT UI
+-- ============================================================================
+
+require("nvim-tree.api").tree.toggle()
