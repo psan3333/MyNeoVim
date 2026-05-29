@@ -1,5 +1,5 @@
 vim.opt.termguicolors = true
-vim.cmd.colorscheme("habamax")
+vim.cmd.colorscheme("catppuccin")
 
 local function set_transparent() -- set UI component to transparent
 	local groups = {
@@ -278,6 +278,16 @@ vim.keymap.set({ "n", "v" }, "<leader>x", '"_d', { desc = "Delete without yankin
 
 vim.keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
+
+vim.keymap.set("n", "<C-s>", ":w<CR>", { desc = "Save file contents" })
+vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", { desc = "Save file contents while in insert mode" })
+
+vim.keymap.set("n", "<C-z>", "u", { desc = "Save file contents" })
+vim.keymap.set("i", "<C-z>", "<ESC>ui", { desc = "Save file contents while in insert mode" })
+
+vim.keymap.set("i", "<C-Down>", "<ESC>o", { desc = "Command 'o' while in insert mode" })
+vim.keymap.set("i", "<C-Up>", "<ESC>O", { desc = "Command 'O' while in insert mode" })
 
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
@@ -419,7 +429,6 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.pack.add({
 	"https://www.github.com/lewis6991/gitsigns.nvim",
 	"https://www.github.com/echasnovski/mini.nvim",
-	"https://www.github.com/ibhagwan/fzf-lua",
 	"https://www.github.com/nvim-tree/nvim-tree.lua",
 	{
 		src = "https://github.com/nvim-treesitter/nvim-treesitter",
@@ -436,6 +445,11 @@ vim.pack.add({
 	},
 	"https://github.com/L3MON4D3/LuaSnip",
 	"https://github.com/obsidian-nvim/obsidian.nvim",
+	"https://github.com/windwp/nvim-ts-autotag",
+	"https://github.com/nvim-tree/nvim-web-devicons",
+	"https://github.com/nvim-lua/plenary.nvim",
+	"https://github.com/nvim-telescope/telescope.nvim",
+	"https://github.com/akinsho/bufferline.nvim",
 })
 
 -- ============================================================================
@@ -499,7 +513,7 @@ local function setup_obsidian()
 	require("obsidian").setup({
 		legacy_commands = false,
 		workspaces = { { name = "Notes", path = "/home/bobrcurva/Documents/Obsidian Vault" } },
-		picker = { name = "fzf-lua" },
+		picker = { name = "" },
 	})
 
 	vim.keymap.set("n", "<leader>nn", function()
@@ -515,6 +529,96 @@ local function setup_obsidian()
 end
 
 setup_obsidian()
+
+local function setup_telescope()
+	local builtin = require("telescope.builtin")
+	vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
+	vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
+	vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
+	vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
+end
+
+setup_telescope()
+
+local function setup_bufferline()
+	local bufferline = require("bufferline")
+	bufferline.setup({
+		options = {
+			mode = "buffers",
+			style_preset = bufferline.style_preset.default,
+			themable = true,
+			numbers = "ordinal",
+			close_command = "bdelete! %d",
+			right_mouse_command = "bdelete! %d",
+			left_mouse_command = "buffer %d",
+			middle_mouse_command = nil,
+			indicator = {
+				icon = "▎",
+				style = "icon",
+			},
+			buffer_close_icon = "󰅖",
+			modified_icon = "● ",
+			close_icon = " ",
+			left_trunc_marker = " ",
+			right_trunc_marker = " ",
+			max_name_length = 18,
+			max_prefix_length = 15,
+			truncate_names = true,
+			tab_size = 18,
+			diagnostics = "nvim_lsp",
+			diagnostics_update_in_insert = false,
+			diagnostics_update_on_event = true,
+			custom_filter = function(buf_number, buf_numbers)
+				if vim.bo[buf_number].filetype ~= "<i-dont-want-to-see-this>" then
+					return true
+				end
+				if vim.fn.bufname(buf_number) ~= "<buffer-name-I-dont-want>" then
+					return true
+				end
+				if vim.fn.getcwd() == "<work-repo>" and vim.bo[buf_number].filetype ~= "wiki" then
+					return true
+				end
+				if buf_numbers[1] ~= buf_number then
+					return true
+				end
+			end,
+			offsets = {
+				{
+					filetype = "NvimTree",
+					text = "File Explorer",
+					text_align = "left",
+					separator = true,
+				},
+			},
+			color_icons = true,
+			get_element_icon = function(element)
+				local icon, hl =
+					require("nvim-web-devicons").get_icon_by_filetype(element.filetype, { default = false })
+				return icon, hl
+			end,
+			show_buffer_icons = true,
+			show_buffer_close_icons = true,
+			show_close_icon = true,
+			show_tab_indicators = true,
+			show_duplicate_prefix = true,
+			duplicates_across_groups = true,
+			persist_buffer_sort = true,
+			move_wraps_at_ends = false,
+			separator_style = "thick",
+			enforce_regular_tabs = false,
+			always_show_bufferline = true,
+			auto_toggle_bufferline = true,
+			hover = {
+				enabled = true,
+				delay = 200,
+				reveal = { "close" },
+			},
+			sort_by = "insert_after_current",
+		},
+	})
+end
+
+setup_bufferline()
 
 require("nvim-tree").setup({
 	view = {
@@ -538,26 +642,7 @@ vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "none" })
 vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { fg = "#2a2a2a", bg = "none" })
 vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { bg = "none" })
 
-require("fzf-lua").setup({})
-
-vim.keymap.set("n", "<leader>ff", function()
-	require("fzf-lua").files()
-end, { desc = "FZF Files" })
-vim.keymap.set("n", "<leader>fg", function()
-	require("fzf-lua").live_grep()
-end, { desc = "FZF Live Grep" })
-vim.keymap.set("n", "<leader>fb", function()
-	require("fzf-lua").buffers()
-end, { desc = "FZF Buffers" })
-vim.keymap.set("n", "<leader>fh", function()
-	require("fzf-lua").help_tags()
-end, { desc = "FZF Help Tags" })
-vim.keymap.set("n", "<leader>fx", function()
-	require("fzf-lua").diagnostics_document()
-end, { desc = "FZF Diagnostics Document" })
-vim.keymap.set("n", "<leader>fX", function()
-	require("fzf-lua").diagnostics_workspace()
-end, { desc = "FZF Diagnostics Workspace" })
+require("nvim-web-devicons").setup({})
 
 require("mini.ai").setup({})
 require("mini.comment").setup({})
@@ -582,6 +667,14 @@ require("gitsigns").setup({
 	},
 	signcolumn = true,
 	current_line_blame = false,
+})
+
+require("nvim-ts-autotag").setup({
+	opts = {
+		enable_close = true, -- Auto close tags
+		enable_rename = true, -- Auto rename pairs of tags
+		enable_close_on_slash = false, -- Auto close on trailing </
+	},
 })
 
 require("mason").setup({})
@@ -632,7 +725,7 @@ vim.diagnostic.config({
 		},
 	},
 	underline = true,
-	update_in_insert = false,
+	update_in_insert = true,
 	severity_sort = true,
 	float = {
 		border = "rounded",
@@ -662,19 +755,14 @@ local function lsp_on_attach(ev)
 	local bufnr = ev.buf
 	local opts = { noremap = true, silent = true, buffer = bufnr }
 
-	vim.keymap.set("n", "<leader>gd", function()
-		require("fzf-lua").lsp_definitions({ jump_to_single_result = true })
-	end, opts)
-
 	vim.keymap.set("n", "<leader>gD", vim.lsp.buf.definition, opts)
-
 	vim.keymap.set("n", "<leader>gS", function()
 		vim.cmd("vsplit")
 		vim.lsp.buf.definition()
 	end, opts)
 
-	vim.keymap.set("n", "<leader>na", vim.lsp.buf.code_action, opts)
-	vim.keymap.set("n", "<C-F2>", vim.lsp.buf.rename, opts)
+	vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+	vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 
 	vim.keymap.set("n", "<leader>D", function()
 		vim.diagnostic.open_float({ scope = "line" })
@@ -691,25 +779,6 @@ local function lsp_on_attach(ev)
 	end, opts)
 
 	vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-
-	vim.keymap.set("n", "<leader>fd", function()
-		require("fzf-lua").lsp_definitions({ jump_to_single_result = true })
-	end, opts)
-	vim.keymap.set("n", "<leader>fr", function()
-		require("fzf-lua").lsp_references()
-	end, opts)
-	vim.keymap.set("n", "<leader>ft", function()
-		require("fzf-lua").lsp_typedefs()
-	end, opts)
-	vim.keymap.set("n", "<leader>fs", function()
-		require("fzf-lua").lsp_document_symbols()
-	end, opts)
-	vim.keymap.set("n", "<leader>fw", function()
-		require("fzf-lua").lsp_workspace_symbols()
-	end, opts)
-	vim.keymap.set("n", "<leader>fi", function()
-		require("fzf-lua").lsp_implementations()
-	end, opts)
 
 	if client:supports_method("textDocument/codeAction", bufnr) then
 		vim.keymap.set("n", "<leader>oi", function()
