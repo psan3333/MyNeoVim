@@ -462,7 +462,8 @@ vim.pack.add({
 -- ============================================================================
 -- PLUGIN CONFIGS
 -- ============================================================================
-package.path = package.path .. ";/home/bobrcurva/.config/nvim/?.lua"
+local modules_path = os.getenv("NVIM_CONFIG")
+package.path = package.path .. ";" .. modules_path .. "/?.lua"
 local setup_treesitter = function()
 	local treesitter = require("nvim-treesitter")
 	treesitter.setup({})
@@ -560,8 +561,7 @@ local function setup_bufferline()
 			left_mouse_command = "buffer %d",
 			middle_mouse_command = nil,
 			indicator = {
-				icon = "▎",
-				style = "icon",
+				style = "underline",
 			},
 			buffer_close_icon = "󰅖",
 			modified_icon = "● ",
@@ -611,7 +611,7 @@ local function setup_bufferline()
 			duplicates_across_groups = true,
 			persist_buffer_sort = true,
 			move_wraps_at_ends = false,
-			separator_style = "thick",
+			separator_style = "padded_slant",
 			enforce_regular_tabs = false,
 			always_show_bufferline = true,
 			auto_toggle_bufferline = true,
@@ -711,7 +711,7 @@ vim.keymap.set("n", "<leader>hd", function()
 	require("gitsigns").diffthis()
 end, { desc = "Diff this" })
 
-local cosmicink = require("cosmicink");
+local cosmicink = require("cosmicink")
 require("lualine").setup(cosmicink.config)
 
 -- ============================================================================
