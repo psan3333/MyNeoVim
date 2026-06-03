@@ -1,5 +1,4 @@
 vim.opt.termguicolors = true
-vim.cmd.colorscheme("catppuccin")
 
 local function set_transparent() -- set UI component to transparent
 	local groups = {
@@ -34,9 +33,9 @@ vim.opt.wrap = false -- do not wrap lines by default
 vim.opt.scrolloff = 10 -- keep 10 lines above/below cursor
 vim.opt.sidescrolloff = 10 -- keep 10 lines to left/right of cursor
 
-vim.opt.tabstop = 4 -- tabwidth
-vim.opt.shiftwidth = 4 -- indent width
-vim.opt.softtabstop = 4 -- soft tab stop not tabs on tab/backspace
+vim.opt.tabstop = 2 -- tabwidth
+vim.opt.shiftwidth = 2 -- indent width
+vim.opt.softtabstop = 2 -- soft tab stop not tabs on tab/backspace
 vim.opt.expandtab = true -- use spaces instead of tabs
 vim.opt.smartindent = true -- smart auto-indent
 vim.opt.autoindent = true -- copy indent from current line
@@ -286,6 +285,9 @@ vim.keymap.set("i", "<C-s>", "<ESC>:w<CR>i", { desc = "Save file contents while 
 vim.keymap.set("n", "<C-z>", "u", { desc = "Undo last change" })
 vim.keymap.set("i", "<C-z>", "<ESC>ui", { desc = "Undo last change for INSERT mode" })
 
+vim.keymap.set("n", "<C-x>", "dd", { desc = "Delete line with yanking" })
+vim.keymap.set("i", "<C-x>", "<ESC>ddi", { desc = "Delete line in INSERT mode" })
+
 vim.keymap.set("n", "<C-b>", "dw", { desc = "Delete preceeding word" })
 vim.keymap.set("i", "<C-b>", "<ESC>ldwi", { desc = "Delete preceeding word in INSERT mode" })
 
@@ -457,11 +459,14 @@ vim.pack.add({
 	"https://github.com/nvim-telescope/telescope.nvim",
 	"https://github.com/akinsho/bufferline.nvim",
 	"https://github.com/nvim-lualine/lualine.nvim",
+	"https://github.com/folke/tokyonight.nvim",
 })
 
 -- ============================================================================
 -- PLUGIN CONFIGS
 -- ============================================================================
+vim.cmd.colorscheme("tokyonight-night")
+
 local modules_path = os.getenv("NVIM_CONFIG")
 package.path = package.path .. ";" .. modules_path .. "/?.lua"
 local setup_treesitter = function()
@@ -611,7 +616,7 @@ local function setup_bufferline()
 			duplicates_across_groups = true,
 			persist_buffer_sort = true,
 			move_wraps_at_ends = false,
-			separator_style = "padded_slant",
+			separator_style = "none",
 			enforce_regular_tabs = false,
 			always_show_bufferline = true,
 			auto_toggle_bufferline = true,
